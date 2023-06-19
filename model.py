@@ -18,6 +18,7 @@ import kserve
 import joblib
 import pathlib
 from typing import Dict
+import logging
 from kserve.errors import InferenceError, ModelMissingError
 
 MODEL_EXTENSIONS = (".joblib", ".pkl", ".pickle")
@@ -60,7 +61,7 @@ class SKLearnModel(kserve.Model):  # pylint:disable=c-extension-no-member
             raise InferenceError(str(e))
         
 if __name__ == "__main__":
-    model = SKLearnModel("model", "/workspace/model")
+    model = SKLearnModel(name = "model", model_dir = "/workspace")
     try:
         model.load()
 
@@ -68,5 +69,4 @@ if __name__ == "__main__":
         logging.error(f"fail to locate model file for model {model_name} under dir {model_dir},"
                       f"trying loading from model repository.")
 
-    kserve.ModelServer(registered_models=SKLearnModelRepository(model_dir)).start(
-        [model] if model.ready else [])
+    kserve.ModelServer().start([model])
