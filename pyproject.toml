@@ -2,7 +2,7 @@
 name = "automated-docker-images"
 version = "0.1.0"
 description = "\"Automate docker images for EA\""
-authors = ["witkowj3 <jakub.witkowski.jw1@roche.com>"]
+authors = ["Jakub Witkowski <jakub.witkowski.jw1@roche.com>"]
 readme = "README.md"
 packages = [{include = "automated_docker_images"}]
 
