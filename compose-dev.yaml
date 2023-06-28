@@ -1,0 +1,14 @@
+services:
+  app:
+    entrypoint:
+      - sleep
+      - infinity
+    image: registry.code.roche.com/one-d-ai/docker-images/poetry
+    init: true
+    volumes:
+      - type: bind
+        source: /var/run/docker.sock
+        target: /var/run/docker.sock
+      - type: bind
+        source: .
+        target: /automated-docker-images
