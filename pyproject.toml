@@ -4,16 +4,12 @@ version = "0.1.0"
 description = "\"Automate docker images for EA\""
 authors = ["Jakub Witkowski <jakub.witkowski.jw1@roche.com>"]
 readme = "README.md"
-packages = [{include = "automated_docker_images"}]
 
 [tool.poetry.dependencies]
 python = "~3.8"
 scikit-learn = "^1.2.2"
 joblib = "^1.2.0"
 kserve = "^0.10.1.1"
-pathlib = "^1.0.1"
-typing = "^3.0"
-logging = "*"
 
 [build-system]
 requires = ["poetry-core"]
