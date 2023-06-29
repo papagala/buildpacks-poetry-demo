@@ -14,7 +14,7 @@ This repository is used for the automatic Docker image creation of the sklearn f
 ### Running buildpacks
 
 1. Install pack CLI, according to the manual: [https://buildpacks.io/docs/tools/pack/](https://buildpacks.io/docs/tools/pack/)
-2. Create `Procfile`, where the entrypoint for docker image will be specified
+2. Create `Procfile`, where the entrypoint for docker image will be specified (sample `Procfile` content: `web: python -m model`). See [Procfile format docs](https://devcenter.heroku.com/articles/procfile#procfile-format) for more information.
 3. Create `runtime.txt` where Python version will be specified
 4. Export `poetry.lock` into `requierments.txt`, used by buildpacks, with: `poetry export --without-hashes --format=requirements.txt > requirements.txt`
 5. Build Docker image with: `pack build --builder=heroku/buildpacks:20 registry.code.roche.com/one-d-ai/early-adopters/automated-docker-images/custom-model:v1`
