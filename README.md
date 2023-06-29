@@ -26,10 +26,10 @@ This repository is used for the automatic Docker image creation of the sklearn f
 1. Run Docker created by bulidpacks: `docker run -ePORT=8080 -p8080:8080 registry.code.roche.com/one-d-ai/early-adopters/automated-docker-images/custom-model:v1`
 2. Check if it can be queried: `curl localhost:8080/v1/models/model:predict -d @./input.json`
 
-### Testing on uat
+### Testing on dev
 
 1. Push Docker image into the GitLab container registry: `docker push registry.code.roche.com/one-d-ai/early-adopters/automated-docker-images/custom-model:v1`
-2. Deploy manually to the UAT cluster (`mlpp` namespace) using `kubectl apply -f kserve-deployment.yaml -n mlpp`. Make sure that this namespace has access to the imagePullSecret, which stores the GitLab deploy token, so that it can pull the required image (compare with this MR: [https://code.roche.com/one-d-ai/platform/projects-control-plane/-/merge_requests/54](https://code.roche.com/one-d-ai/platform/projects-control-plane/-/merge_requests/54))
+2. Deploy manually to the DEV cluster (`mlpp` namespace) using `kubectl apply -f kserve-deployment.yaml -n mlpp`. Make sure that this namespace has access to the imagePullSecret, which stores the GitLab deploy token, so that it can pull the required image (compare with this MR: [https://code.roche.com/one-d-ai/platform/projects-control-plane/-/merge_requests/54](https://code.roche.com/one-d-ai/platform/projects-control-plane/-/merge_requests/54))
 3. Afterwards, check if the inference service can be accessed, e.g. by:
 
     ```bash
