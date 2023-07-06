@@ -11,14 +11,16 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-# from: https://github.com/kserve/kserve/blob/master/python/sklearnserver/sklearnserver/model.py
-import os
+# from:
+# https://github.com/kserve/kserve/blob/master/python/sklearnserver/sklearnserver/model.py
 
-import kserve
-import joblib
+import logging
+import os
 import pathlib
 from typing import Dict
-import logging
+
+import joblib
+import kserve
 from kserve.errors import InferenceError, ModelMissingError
 
 MODEL_EXTENSIONS = (".joblib", ".pkl", ".pickle")
@@ -42,8 +44,10 @@ class SKLearnModel(kserve.Model):  # pylint:disable=c-extension-no-member
         if len(model_files) == 0:
             raise ModelMissingError(model_path)
         elif len(model_files) > 1:
-            raise RuntimeError('More than one model file is detected, '
-                               f'Only one is allowed within model_dir: {model_files}')
+            raise RuntimeError(
+                "More than one model file is detected, "
+                f"Only one is allowed within model_dir: {model_files}"
+            )
         self._model = joblib.load(model_files[0])
         self.ready = True
         return self.ready
@@ -51,22 +55,26 @@ class SKLearnModel(kserve.Model):  # pylint:disable=c-extension-no-member
     def predict(self, payload: Dict, headers: Dict[str, str] = None) -> Dict:
         instances = payload["instances"]
         try:
-            if os.environ.get(ENV_PREDICT_PROBA, "false").lower() == "true" and \
-                    hasattr(self._model, "predict_proba"):
+            if os.environ.get(ENV_PREDICT_PROBA, "false").lower() == "true" and hasattr(
+                self._model, "predict_proba"
+            ):
                 result = self._model.predict_proba(instances).tolist()
             else:
                 result = self._model.predict(instances).tolist()
             return {"predictions": result}
         except Exception as e:
             raise InferenceError(str(e))
-        
+
+
 if __name__ == "__main__":
-    model = SKLearnModel(name = "model", model_dir = "/workspace")
+    model = SKLearnModel(name="model", model_dir="/workspace")
     try:
         model.load()
 
     except ModelMissingError:
-        logging.error(f"fail to locate model file for model {model_name} under dir {model_dir},"
-                      f"trying loading from model repository.")
+        logging.error(
+            "fail to locate model file for model under dir /workspace,"
+            "trying loading from model repository."
+        )
 
     kserve.ModelServer().start([model])
