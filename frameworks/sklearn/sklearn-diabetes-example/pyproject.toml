@@ -1,0 +1,80 @@
+[tool.poetry]
+name = "sklearn-diabetes-example"
+version = "1.0.0"
+description = "An example application."
+authors = [
+    "Author 1 <author.1@roche.com>",
+]
+license = "Proprietary"
+readme = "README.md"
+
+[tool.poetry.dependencies]
+# basic
+python = "~3.8"
+toml = "^0.10.2"
+# jupyter
+ipykernel = { version = "^6.15.1" }
+# Any additional required packages must be installed in order to be accessible 
+# from within a Jupyter Notebook.
+# If such dependencies are only going to be use for development purposes, make sure
+# you install it with `poetry add -D seaborn` for example. The `-D` flag will add
+# dependencies which are only used for development.
+# Then start your jupyter notebook (if running it locally) like this
+# `poetry run jupyter notebook`.
+scikit-learn = "^1.1.2"
+matplotlib = "^3.6.1"
+pandas = "^1.5.1"
+numpy = "^1.23.4"
+kserve = "^0.10.2"
+
+[tool.poetry.dev-dependencies]
+# testing
+pytest = "^7.1.2"
+pytest-cov = "^3.0.0"
+
+# formatting
+black = "^22.6.0"
+flake8 = "^4.0.1"
+pydocstyle = "^6.1.1"
+isort = "^5.10.1"
+yamllint = "^1.27.1"
+
+# type checking
+mypy = "^0.961"
+types-setuptools = "^62.6.1"
+
+# other
+ipython = "^8.4.0"
+debugpy = "^1.6.2"
+
+[tool.poetry.extras]
+jupyter = ["ipykernel"] # add additional dependencies here as needed
+
+[tool.poetry.group.dev.dependencies]
+jupyter = "^1.0.0"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+###############
+# Other tools #
+###############
+
+[tool.pytest.ini_options]
+addopts = "-ra -v"
+testpaths = ["tests"]
+
+[tool.black]
+line-length = 99
+target-version = ['py38']
+
+[tool.isort]
+profile = "black"
+
+[tool.pydocstyle]
+add-ignore = "D100,D104,D105"
+convention = "google"
+
+[[tool.mypy.overrides]]
+ignore_missing_imports = true
