@@ -10,11 +10,9 @@ I made an effort to minimize the code from Elina, which turned into adding the f
 - Ran `poetry add kserve="^0.10.2"` so that we can start creating an inference endpoint. This adds the right dependencies to the `pyproject.toml` file.
   - `requirements.txt`: Created by running `poetry export --without-hashes --without dev -f requirements.txt -o requirements.txt`.
 - Built the Docker image with `pack build --builder=heroku/buildpacks:20 --creation-time now registry.code.roche.com/one-d-ai/early-adopters/automated-docker-images/diabetes:1.0.0`. In order to run this command, you must install [pack](https://buildpacks.io/docs/tools/pack/#install).
-- kserve-deployment.yaml: This is an example file that maps the built image above, into a Kubernetes `apiVersion: serving.kserve.io/v1beta1`.
+- `kserve-deployment.yaml`: This is an example file that maps the built image above, into a Kubernetes `apiVersion: serving.kserve.io/v1beta1`.
 
 ## Locally spin up an endpoint
-
-### First we need to create a docker using build packs. First install `brew`
 
 ## Usage
 
@@ -32,26 +30,26 @@ I made an effort to minimize the code from Elina, which turned into adding the f
     cd frameworks/sklearn/sklearn-diabetes-example
     ```
 
-1. Export the `requirements.txt` by running:
+2. Export the `requirements.txt` by running:
 
     ```bash
     poetry export --without-hashes --without dev -f requirements.txt -o requirements.txt
     ```
 
-1. Build the docker image. From your terminal run:
+3. Build the docker image. From your terminal run:
 
     ```bash
     image_name=registry.code.roche.com/one-d-ai/early-adopters/automated-docker-images/diabetes:1.0.0
     pack build --builder=heroku/buildpacks:20 --creation-time now $image_name
     ```
 
-1. Run the Docker image locally:
+4. Run the Docker image locally:
 
     ```bash
     docker run -ePORT=8080 -p8080:8080 registry.code.roche.com/one-d-ai/early-adopters/automated-docker-images/diabetes:1.0.0
     ```
 
-1. Call your local endpoint to return predictions:
+5. Call your local endpoint to return predictions:
 
     ```bash
     curl --location 'http://localhost:8080/v1/models/sklearn-diabetes:predict' \
@@ -86,6 +84,12 @@ I made an effort to minimize the code from Elina, which turned into adding the f
     }'
     ```
 
+    In the output, you should receive:
+
+    ```bash
+    {"predictions":[204.1345201689273,68.85081454758824]}
+    ```
+
 ### Notebooks
 
 You may run the `notebooks/` in the following order to train, test locally, and call the local endpoint:
@@ -93,4 +97,3 @@ You may run the `notebooks/` in the following order to train, test locally, and 
 - `01-train-model-locally`
 - `02-use-local-model`
 - `03-call-local-endpoint`
-

@@ -30,7 +30,9 @@ This example is used for the automatic Docker image creation of the sklearn fram
 
 1. Push Docker image into the GitLab container registry: `docker push registry.code.roche.com/one-d-ai/early-adopters/automated-docker-images/custom-model:1.0.0`
 2. Deploy manually to the DEV cluster (`mlpp` namespace) using `kubectl apply -f kserve-deployment.yaml -n mlpp`. Make sure that this namespace has access to the imagePullSecret, which stores the GitLab deploy token, so that it can pull the required image (compare with this MR: [https://code.roche.com/one-d-ai/platform/projects-control-plane/-/merge_requests/54](https://code.roche.com/one-d-ai/platform/projects-control-plane/-/merge_requests/54))
-3. Afterwards, check if the inference service can be accessed, e.g. by:
+3. Obtain the [Kubeflow Dev](https://dashboard.kubeflow.dev.pred-mlops.roche.com/) session cookie to authenticate with the endpoint
+   - In Chrome, you need to open the "Developer Tools" menu (e.g by right clicking anywhere on [the Kubeflow page](https://dashboard.kubeflow.dev.pred-mlops.roche.com/) and selecting the `Inspect` option from the context menu), now you can go to the `Application` tab, and in the left hand-side `Storage` section under `Cookies` select the `https://dashboard.kubeflow.dev.pred-mlops.roche.com/` cookie and copy the string value of `authservice_session`
+4. Afterwards, check if the inference service can be accessed. e.g. with this `curl` command (make sure to replace the `COOKIE` with the value from the previous step):
 
     ```bash
     curl --location --request POST  'https://ea-custom-model-predictor-default.mlpp.inference.kubeflow.dev.pred-mlops.roche.com/v1/models/model:predict' \
@@ -39,4 +41,8 @@ This example is used for the automatic Docker image creation of the sklearn fram
     --data-raw '{"instances": [[6.8, 2.8, 4.8, 1.4],[6.0, 3.4, 4.5, 1.6]]}'
     ```
 
-    where `COOKIE` stands for the cookie value of the Kubeflow session.
+    In the output, you should receive:
+
+    ```bash
+    {"predictions":[1,1]}
+    ```
