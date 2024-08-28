@@ -1,0 +1,13 @@
+include:
+  - template: Auto-DevOps.gitlab-ci.yml
+
+variables:
+  AUTO_DEVOPS_BUILD_IMAGE_CNB_ENABLED: "true"
+  AUTO_DEVOPS_BUILD_IMAGE_CNB_BUILDER: "heroku/builder:24"
+  CI_APPLICATION_REPOSITORY: "registry.code.roche.com/gomezmj2/automated-docker-images"
+  CI_APPLICATION_TAG: "v0.0.1"
+  TEST_DISABLED: "true"
+
+# Due to some network issues
+test:
+  retry: 2
