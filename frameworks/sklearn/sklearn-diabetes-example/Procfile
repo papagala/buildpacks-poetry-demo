@@ -1,1 +1,0 @@
-web: python -m start_inference_endpoint --model_name sklearn-diabetes --trained_model_path model

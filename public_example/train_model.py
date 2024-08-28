@@ -1,6 +1,5 @@
-from sklearn import svm
-from sklearn import datasets
 from joblib import dump
+from sklearn import datasets, svm
 
 iris = datasets.load_iris()
 X, y = iris.data, iris.target

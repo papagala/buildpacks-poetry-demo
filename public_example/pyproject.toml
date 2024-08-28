@@ -12,12 +12,17 @@ authors = [
     "Paweł Cisło <pawel.cislo@contractors.roche.com>",
 ]
 readme = "README.md"
+package-mode = false
 
 [tool.poetry.dependencies]
-python = "~3.8"
+python = "~3.10"
 scikit-learn = "^1.2.2"
 joblib = "^1.2.0"
-kserve = "^0.10.2"
+kserve = "^0.13.1"
+
+[tool.poetry.group.dev.dependencies]
+black = "^24.8.0"
+isort = "^5.13.2"
 
 [build-system]
 requires = ["poetry-core"]
