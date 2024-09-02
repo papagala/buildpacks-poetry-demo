@@ -33,7 +33,6 @@ build-image:
       --builder paketobuildpacks/builder-jammy-base
       --cache-image "${CI_REGISTRY_IMAGE}:${CACHE_IMAGE_NAME}"
       --publish
-      --env 'BP_CPYTHON_VERSION=3.10.*'
       --env POETRY_HTTP_BASIC_FOO_USERNAME=gitlab-ci-token
       --env POETRY_HTTP_BASIC_FOO_PASSWORD=$CI_JOB_TOKEN
       --env POETRY_REPOSITORIES_FOO_URL=${CI_API_V4_URL}/projects/362083/packages/pypi/simple/
