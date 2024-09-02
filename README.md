@@ -15,9 +15,7 @@ This example is used for the automatic Docker image creation of the sklearn fram
 
 1. Install pack CLI, according to the manual: [https://buildpacks.io/docs/tools/pack/](https://buildpacks.io/docs/tools/pack/)
 2. Create `Procfile`, where the entrypoint for docker image will be specified (sample `Procfile` content: `web: python -m model`). See [Procfile format docs](https://devcenter.heroku.com/articles/procfile#procfile-format) for more information.
-3. Create `runtime.txt` where Python version will be specified (e.g.: `python-3.8.17`)
-4. Export `poetry.lock` into `requierments.txt`, used by buildpacks, with: `poetry export --without-hashes --format=requirements.txt > requirements.txt`
-5. Build Docker image with: `pack build --builder=heroku/buildpacks:20 --creation-time now registry.code.roche.com/one-d-ai/early-adopters/automated-docker-images/custom-model:1.0.0`
+3. Build Docker image with: `pack build --builder=heroku/buildpacks:20 --creation-time now registry.code.roche.com/one-d-ai/early-adopters/automated-docker-images/custom-model:1.0.0`
 
 ## Testing
 
@@ -46,3 +44,40 @@ This example is used for the automatic Docker image creation of the sklearn fram
     ```bash
     {"predictions":[1,1]}
     ```
+
+
+### Importing private packages
+
+To install private packages with Poetry and GitLab, you can follow these steps:
+
+1. Make sure you have the necessary access credentials for the private GitLab repository that hosts the package.
+
+2. Open your terminal and navigate to the root directory of your project.
+
+3. Add the private GitLab repository as a dependency source in your `pyproject.toml` file. You can do this by adding the following lines under the `[tool.poetry.dependencies]` section:
+
+   ```toml
+   [[tool.poetry.source]]
+   name = "my-private-repo"
+   url = "https://code.roche.com/api/v4/projects/362083/packages/pypi/simple/"
+   priority = "supplemental"
+   ```
+
+   Replace `my-private-repo` with a name of your choice and `https://gitlab.com/your-username/your-private-repo.git` with the URL of your private GitLab repository.
+
+4. Save the `pyproject.toml` file.
+
+5. Run the following command to authenticate with GitLab and install the private package:
+
+   ```bash
+   poetry config http-basic.my-private-repo __token__ your-PAT-token
+   poetry install
+   ```
+
+   Replace `my-private-repo` with the name you used in step 3, `your-username` with your GitLab username, and `your-access-token` with a personal access token that has access to the private repository.
+
+   Note: You can generate a personal access token in GitLab by going to your GitLab account settings and navigating to "Access Tokens".
+
+6. Poetry will now fetch and install the private package from the GitLab repository along with any other dependencies specified in your `pyproject.toml` file.
+
+Remember to replace `your-username` and `your-private-repo` with your actual GitLab username and repository URL.

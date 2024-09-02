@@ -3,19 +3,15 @@ name = "automated-docker-images"
 version = "0.1.0"
 description = "Automate docker images for EA."
 authors = [
-    "Jakub Witkowski <jakub.witkowski.jw1@roche.com>",
-    "Krystian Kozieł <krystian.koziel@contractors.roche.com>",
-    "Lorenzo Maffioli <lorenzo.maffioli@roche.com>",
-    "Łukasz Rakoczy <lukasz.rakoczy@roche.com>",
-    "Muller Mu <muller.mu@roche.com>",
     "Oswaldo Gomez <oswaldo.gomez@roche.com>",
-    "Paweł Cisło <pawel.cislo@contractors.roche.com>",
 ]
 readme = "README.md"
 package-mode = false
 
+
 [tool.poetry.dependencies]
-python = "~3.10"
+python = ">=3.10,<3.12"
+dummy_package_testing = "~0.1.2"
 scikit-learn = "^1.2.2"
 joblib = "^1.2.0"
 kserve = "^0.13.1"
@@ -23,6 +19,11 @@ kserve = "^0.13.1"
 [tool.poetry.group.dev.dependencies]
 black = "^24.8.0"
 isort = "^5.13.2"
+
+[[tool.poetry.source]]
+name = "foo"
+url = "https://code.roche.com/api/v4/projects/362083/packages/pypi/simple/"
+priority = "supplemental"
 
 [build-system]
 requires = ["poetry-core"]
