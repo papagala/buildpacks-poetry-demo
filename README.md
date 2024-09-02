@@ -1,52 +1,74 @@
-# Automated Docker images
+# Docker images with buildpacks
 
-This example is used for the automatic Docker image creation of the sklearn framework with a [public sklearn model](https://kserve.github.io/website/0.8/modelserving/v1beta1/sklearn/v2/).
+This repository is a non-trival example of how to use Cloud Native Buildpacks using the paketo builder. Also, this installed a private package. 
 
-## Usage
+## Prerequisites
 
-### Prerequisites
+1. Install poetry with  `curl -sSL https://install.python-poetry.org | python3 -` or follow the [documentation](https://python-poetry.org/docs/#installing-with-the-official-installer).
+2. Install `pack` cli with `brew install buildpacks/tap/pack` or follow the [documentation](https://buildpacks.io/docs/for-platform-operators/how-to/integrate-ci/pack/)
+3. You need to have docker installed locally in order to build and run docker images. You can use [Docker Desktop](https://www.docker.com/products/docker-desktop/). Make sure you request Docker Business subscription [info](https://devhub.roche.com/catalog/default/system/fk-ef-docker-business).
 
-1. Create `pyproject.toml` file to handle packages via poetry
-2. Run poetry (`poetry build`) to create the environment
-3. Train sklearn model using `train_model.py`, which will output the `model.joblib` file
-4. Create functions that will load the model and run prediction (`model.py`) - the code was copied from: [https://github.com/kserve/kserve/blob/master/python/sklearnserver/sklearnserver/model.py](https://github.com/kserve/kserve/blob/master/python/sklearnserver/sklearnserver/model.py)
+## Buildpacks files
 
-### Running buildpacks
+This repository only uses poetry and a special file called `Procfile`.
 
-1. Install pack CLI, according to the manual: [https://buildpacks.io/docs/tools/pack/](https://buildpacks.io/docs/tools/pack/)
-2. Create `Procfile`, where the entrypoint for docker image will be specified (sample `Procfile` content: `web: python -m model`). See [Procfile format docs](https://devcenter.heroku.com/articles/procfile#procfile-format) for more information.
-3. Build Docker image with: `pack build --builder=heroku/buildpacks:20 --creation-time now registry.code.roche.com/one-d-ai/early-adopters/automated-docker-images/custom-model:1.0.0`
+1. Create `Procfile`, where the entrypoint for docker image will be specified (sample `Procfile` content: `web: python -m model`). See [Procfile format docs](https://devcenter.heroku.com/articles/procfile#procfile-format) for more information.
 
-## Testing
+## Building a new image locally
 
-### Testing locally
+Make sure you replace your token below where it says `__your_token__`.
 
-1. Run Docker created by bulidpacks: `docker run -ePORT=8080 -p8080:8080 registry.code.roche.com/one-d-ai/early-adopters/automated-docker-images/custom-model:1.0.0`
-2. Check if it can be queried: `curl localhost:8080/v1/models/model:predict -d @./input.json`
+```bash
+CI_API_V4_URL="https://code.roche.com/api/v4" \
+PROJECT_ID="362083" \
+DOCKER_REGISTRY="registry.code.roche.com/gomezmj2/automated-docker-images" \
+TAG="0.1.0"
 
-### Testing on dev
+pack build "${DOCKER_REGISTRY}:${TAG}" \
+  --builder paketobuildpacks/builder-jammy-base \
+  --env POETRY_HTTP_BASIC_FOO_USERNAME=___token__ \
+  --env POETRY_HTTP_BASIC_FOO_PASSWORD=__your_token__ \
+  --env POETRY_REPOSITORIES_FOO_URL="${CI_API_V4_URL}/projects/${PROJECT_ID}/packages/pypi/simple/"
+```
 
-1. Push Docker image into the GitLab container registry: `docker push registry.code.roche.com/one-d-ai/early-adopters/automated-docker-images/custom-model:1.0.0`
-2. Deploy manually to the DEV cluster (`mlpp` namespace) using `kubectl apply -f kserve-deployment.yaml -n mlpp`. Make sure that this namespace has access to the imagePullSecret, which stores the GitLab deploy token, so that it can pull the required image (compare with this MR: [https://code.roche.com/one-d-ai/platform/projects-control-plane/-/merge_requests/54](https://code.roche.com/one-d-ai/platform/projects-control-plane/-/merge_requests/54))
-3. Obtain the [Kubeflow Dev](https://dashboard.kubeflow.dev.pred-mlops.roche.com/) session cookie to authenticate with the endpoint
-   - In Chrome, you need to open the "Developer Tools" menu (e.g by right clicking anywhere on [the Kubeflow page](https://dashboard.kubeflow.dev.pred-mlops.roche.com/) and selecting the `Inspect` option from the context menu), now you can go to the `Application` tab, and in the left hand-side `Storage` section under `Cookies` select the `https://dashboard.kubeflow.dev.pred-mlops.roche.com/` cookie and copy the string value of `authservice_session`
-4. Afterwards, check if the inference service can be accessed. e.g. with this `curl` command (make sure to replace the `COOKIE` with the value from the previous step):
+## Testing locally
 
-    ```bash
-    curl --location --request POST  'https://ea-custom-model-predictor-default.mlpp.inference.kubeflow.dev.pred-mlops.roche.com/v1/models/model:predict' \
-    --header 'Cookie: authservice_session=COOKIE' \
-    --header 'Content-Type: application/json' \
-    --data-raw '{"instances": [[6.8, 2.8, 4.8, 1.4],[6.0, 3.4, 4.5, 1.6]]}'
-    ```
+1. Run docker image created with buildpacks. 
 
-    In the output, you should receive:
+```bash
+DOCKER_REGISTRY="registry.code.roche.com/gomezmj2/automated-docker-images" \
+TAG="0.1.0"
 
-    ```bash
-    {"predictions":[1,1]}
-    ```
+docker run -ePORT=8080 -p8080:8080 "${DOCKER_REGISTRY}:${TAG}"
+```
 
+From another terminal run:
 
-### Importing private packages
+```bash
+curl --location --request POST 'localhost:8080/v1/models/model:predict' \
+  --header 'Content-Type: application/json' \
+  --data-raw '{"instances": [[6.8, 2.8, 4.8, 1.4],[6.0, 3.4, 4.5, 1.6]]}'
+```
+
+Expected response:
+
+```bash
+{"predictions":[1,1]}
+```
+
+## Using GitLab CI
+
+This repository has an example `.gitlab-ci.yml` that installs `pack` CLI, builds a docker image and even builds a cache image so that upcoming CI/CD runs become faster since `poetry` will not try to resolve dependencies again, nor reinstall any packages. 
+
+Currently this repositories version will be used as a tag of the docker image, if you make some changes, make sure you run 
+
+```bash
+poetry versin patch 
+```
+
+And commit your changes in a new branch, and open up a Merge Request. 
+
+## Importing private packages
 
 To install private packages with Poetry and GitLab, you can follow these steps:
 
@@ -81,3 +103,55 @@ To install private packages with Poetry and GitLab, you can follow these steps:
 6. Poetry will now fetch and install the private package from the GitLab repository along with any other dependencies specified in your `pyproject.toml` file.
 
 Remember to replace `your-username` and `your-private-repo` with your actual GitLab username and repository URL.
+
+You can also go to the private GitLab that hosts the private package that you want to install, and go to Settings > CI/CD > Token Access and click on `Add project` so that you can use the `$CI_JOB_TOKEN` environment variable that is always present during any CI/CD in GitLab to authenticate like in the .gitlab-ci.yml in this repository. 
+
+```yaml
+pack build
+"${CI_REGISTRY_IMAGE}:${PACKAGE_VERSION}"
+--builder paketobuildpacks/builder-jammy-base
+--cache-image "${CI_REGISTRY_IMAGE}:${CACHE_IMAGE_NAME}"
+--publish
+--env 'BP_CPYTHON_VERSION=3.10.*'
+--env POETRY_HTTP_BASIC_FOO_USERNAME=gitlab-ci-token
+--env POETRY_HTTP_BASIC_FOO_PASSWORD=$CI_JOB_TOKEN
+--env POETRY_REPOSITORIES_FOO_URL=${CI_API_V4_URL}/projects/362083/packages/pypi/simple/
+```
+
+## Advanced
+
+### Caching
+
+You can make use of caching so that GitLab CI/CD will take much less than than without it.
+
+```bash
+pack build registry.code.roche.com/gomezmj2/automated-docker-images:0.1.0 \
+  --builder paketobuildpacks/builder-jammy-base \
+  --env POETRY_HTTP_BASIC_FOO_USERNAME=___token__ \
+  --env POETRY_HTTP_BASIC_FOO_PASSWORD=__your_token__ \
+  --env POETRY_REPOSITORIES_FOO_URL=https://code.roche.com/api/v4/projects/362083/packages/pypi/simple/ \
+  --env SERVICE_BINDING_ROOT=/usr/local/share/ca-certificates/ \
+  --env BP_EMBED_CERTS=true \
+  --cache-image registry.code.roche.com/gomezmj2/automated-docker-images:cache-image \
+  --publish \
+  --volume "$PWD/bindings:/usr/local/share/ca-certificates/"
+```
+
+### CA-Certificates
+
+You can add run-time ca-certificates during buildtime so that they are available during run time
+
+```bash
+pack build registry.code.roche.com/gomezmj2/automated-docker-images:0.1.0 \
+  --builder paketobuildpacks/builder-jammy-base \
+  --env POETRY_HTTP_BASIC_FOO_USERNAME=___token__ \
+  --env POETRY_HTTP_BASIC_FOO_PASSWORD=__your_token__ \
+  --env POETRY_REPOSITORIES_FOO_URL=https://code.roche.com/api/v4/projects/362083/packages/pypi/simple/ \
+  --env SERVICE_BINDING_ROOT=/usr/local/share/ca-certificates/ \
+  --env BP_EMBED_CERTS=true \
+  --cache-image registry.code.roche.com/gomezmj2/automated-docker-images:cache-image \
+  --publish \
+  --volume "$PWD/bindings:/usr/local/share/ca-certificates/"
+```
+
+If you rather worry about adding ca-certificates during run time, and you are deploying this in Kubernetes, checkout the project [Roche Certs Kubernetes Volume](https://code.roche.com/librarians/developer-experience/roche-certs-kubernetes-volume#using-with-paketo-built-images). Thanks Cezary Krzyzanowski for sharing this with me. 
