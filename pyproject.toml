@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "automated-docker-images"
-version = "0.1.2"
+version = "0.1.3"
 description = "Automate docker images for EA."
 authors = [
     "Oswaldo Gomez <oswaldo.gomez@roche.com>",
