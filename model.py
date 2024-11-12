@@ -7,7 +7,6 @@ import joblib
 import kserve
 from kserve.errors import InferenceError, ModelMissingError
 
-from dummy_package_testing.main import hello_world
 
 MODEL_EXTENSIONS = (".joblib", ".pkl", ".pickle")
 ENV_PREDICT_PROBA = "true"
@@ -48,7 +47,6 @@ class SKLearnModel(kserve.Model):  # pylint:disable=c-extension-no-member
             else:
                 result = self._model.predict(instances).tolist()
                 
-            print(hello_world)
             return {"predictions": result}
         except Exception as e:
             raise InferenceError(str(e))
